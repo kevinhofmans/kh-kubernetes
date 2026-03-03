@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kh-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kh-api
+  template:
+    metadata:
+      labels:
+        app: kh-api
+    spec:
+      containers:
+        - name: kh-api
+          image: kevinhofmans/kh-fastapi-app:v6
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: postgresql://postgres:postgres@kh-postgres:5432/Users
+          #Healthcheck:
+          #Liveness probe: herstart de container als /health niet meer reageert
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+          #Eerst 10seconde wachten na opstart, daarna zal k8s elke 10 sec een request sturen naar /health. 3 keer geen reactie ->container wordt herstart
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          #Readiness probe: stuur pas verkeer als de API klaar is
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+          #Eerst 5sec wachten na opstart, daarna zal k8s elke 5sec checken of de api klaar is om verkeer te ontvangen. Na 3 mislukte checks => k8s haalt de pod tijdelijk uit service
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3

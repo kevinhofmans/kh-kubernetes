@@ -1,0 +1,17 @@
+apiVersion: v1
+#een aanvraag voor opslagruimte
+kind: PersistentVolumeClaim
+metadata:
+  name: kh-postgres-pvc
+spec:
+  accessModes:
+  #Er mag 1 pod tegelijk lezen / schrijven.
+  #Aangezien een database stateful is en dus bij elke pod een eigen pvc heeft = altijd readwriteonce
+    - ReadWriteOnce
+  resources:
+    requests:
+    #5gigabyte opslagruimte aanvragen bij k8s
+      storage: 5Gi
+#k8s zoekt een beschikbare PV -> gevonden? PVC gekoppeld aan PV
+                              #->niet gevonden? pvc blijft in "pending" status
+#Kubectl get pvc

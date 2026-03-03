@@ -1,0 +1,16 @@
+#Hierdoor kan de frontend http://kh-api:8000 gebruiken
+apiVersion: v1
+kind: Service
+metadata:
+  name: kh-api
+spec:
+  type: ClusterIP
+  selector:
+    app: kh-api
+  ports:
+   #api service luistert op poort 8000
+    - port: 8000
+    #Inkomend verkeer wordt doorgestuurd naar poort 8000 van de container, dit heb je ingesteld in je dockerfile CMD.
+      targetPort: 8000
+      #met ingress is dit niet meer nodig
+      #nodePort: 30222

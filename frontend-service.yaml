@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kh-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: kh-frontend
+  ports:
+    - port: 80
+      #Binnenkoment verkeer doorsturen naar container via port 80
+      targetPort: 80
+      #niet meer van toepassing door ingress:
+      #verkeer komt binnen via http://localhost:nodePort
+      #nodePort: 30080

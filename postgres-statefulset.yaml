@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+#O.a. voor een vaste koppeling tussen pod en opslag (nuttig bij meerdere replica's. )
+#Best praktisch database = statefulset
+kind: StatefulSet
+metadata:
+  name: kh-postgres
+spec:
+  serviceName: kh-postgres #verwijst naar de metadata naam van je service yaml file.
+  replicas: 1 #aantal pods instellen
+  selector:
+    matchLabels:
+      app: kh-postgres #Zoek naar alle pods met dit label, dit wordt dan vergeleken met de ingestelde replicas.
+  template:
+    metadata:
+      labels:
+        app: kh-postgres  #Elke pod die aangemaakt wordt krijgt een label.
+    spec:
+      containers:
+        - name: kh-postgres
+          image: postgres:15
+          ports:
+          #container luistert op deze poort, maar is puur informatief.
+          #postgreSQL luistert sowieso op poort 5432
+            - containerPort: 5432
+          env:
+          #de postgress image wilt zichzelf kunnen configureren=> er moeten enkele variablen meegegeven worden.
+            - name: POSTGRES_DB 
+              value: Users
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+          volumeMounts:
+          #via 'volumes' geef je aan waar de data zich bevindt en via 'volumeMounts' koppel je dit aan de juiste map in de container.
+            - name: kh-postgres-storage
+              mountPath: /var/lib/postgresql/data #Er zal eerst gekeken worden in deze map, geen data? => kijkt automatisch naar /docker-entrypoint-initdb.d
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d  #In de container wordt naar deze map gekeken (dus als er geen data is) 
+                                                      #en die is gekoppeld aan kh-postgres-initdb met daarin de sql.
+
+      #Volumes = de bron definieeren, waar komt mijn data vandaan => een naam geven => naam kan je gebruiken bij volumemount
+      volumes:
+      #name = puur intern binnen dit yaml bestand // de claimName moet overeenkomen met je PVC yaml bestand
+        - name: kh-postgres-storage
+          persistentVolumeClaim:
+            claimName: kh-postgres-pvc
+        #Initdb kan hier gevonden worden:
+        #!Wordt enkel toegepast bij de allereerste keer opstart cluster of na het deleten van je PVC.
+        - name: initdb
+          configMap:
+          #Er wordt gekeken naar de metadata niet naar de bestandsnaam (postgres-initdb-configmap.yaml)
+            name: kh-postgres-initdb

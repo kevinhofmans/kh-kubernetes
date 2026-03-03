@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory #Het adres van Let's Encrypt waar certificaten worden aangevraagd.
+    email: kevin.hofmans@outlook.be #mijn eigen mail, let's encrypt kan me contacteren bij problemen.
+    privateKeySecretRef:
+      name: letsencrypt-prod #dit is de privatekey van mijn account bij let'encrypt
+      #cert-manager gebruikt dit om zicht te indentificeren bij Let's Encrypt.
+    solvers:
+    - http01: #dit is een verificatiemethode, let's encrypt moet bewijzen dat jij de eigenaar bent van kevinhofmans.xyz *
+        ingress:
+          ingressClassName: nginx
+#* 1)cert-manager maakt tijdelijk een speciaal endpoint aan op http://kevinhofmans.xyz/.well-known/acme-challenge/....
+#  2)let's encrypt bezoekt dat endpoint
+#  3)Als het bereikbaar is -> bewijs geleverd -> certificaat wordt uitgeschreven.

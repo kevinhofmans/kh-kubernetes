@@ -1,0 +1,14 @@
+apiVersion: v1
+#Netwerkverkeer -> gaat naar de juiste pod dankzij 'service'
+kind: Service
+metadata:
+#De naam die je dus kan gebruiken voor je pods (statefulset) en api te koppelen.
+  name: kh-postgres
+spec:
+  ports:
+  #op welke poort luistert deze service:
+  #postgreSQL gebruikt poort 5432
+    - port: 5432
+  selector:
+  #stuur al het verkeer door naar pods met label:
+    app: kh-postgres
