@@ -26,7 +26,8 @@ data:
             .then((data) => {
               // get user name
               //const user = data.name; gebruiken bij python dictonary
-              const user = data[0];
+              //const user = data[0];
+              const user = data.join(", ");
               // display user name
               document.getElementById("user").innerText = user;
             });
